@@ -9,14 +9,18 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@headlessui/react": "^1.7.14",
     "@next/font": "13.1.6",
+    "@react-spring/web": "9.5.5",
     "axios": "^1.4.0",
     "clsx": "^1.2.1",
+    "dotenv": "^16.0.3",
     "eslint": "8.34.0",
     "eslint-config-next": "13.1.6",
     "next": "13.1.6",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-tinder-card": "^1.6.2",
     "swr": "^2.1.5"
   },
   "devDependencies": {
