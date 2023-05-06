@@ -77,10 +77,11 @@ export default function Card() {
     setEmployees(shuffle(employees.records));
   }
 
-  async function getNames() {
+  async function getNames(employee) {
+    console.log("e", employee, employee.fields.gender);
     const names = await axios
       .get(
-        `${process.env.NEXT_PUBLIC_AIRTABLE_URI}/employee?fields%5B%5D=name`,
+        `${process.env.NEXT_PUBLIC_AIRTABLE_URI}/employee?fields%5B%5D=name&filterByFormula=AND(%7Bgender%7D%3D%22${employee.fields.gender}%22%2C%7Bname%7D!%3D%22${employee.fields.name}%22)`,
         {
           headers: {
             Authorization: `Bearer ` + process.env.NEXT_PUBLIC_AIRTABLE_TOKEN,
@@ -97,7 +98,7 @@ export default function Card() {
 
   async function askQuestions(employee) {
     // console.log(employee);
-    const names = await getNames();
+    const names = await getNames(employee);
     names.push(employee);
     setNames(shuffle(names));
     setIsOpen(true);
@@ -110,7 +111,7 @@ export default function Card() {
     // getNames();
   }, []);
 
-  //   console.log(employee);
+  console.log(employee);
 
   return (
     <PageLayout>
@@ -122,7 +123,7 @@ export default function Card() {
               ? employees.map((e, i) => (
                   <TinderCard
                     key={e.id}
-                    className="swipe  absolute inset-0"
+                    className="swipe p-2 absolute inset-0"
                     onSwipe={(dir) => swiped(dir, e)}
                     onCardLeftScreen={() => outOfFrame(e.fields.name, i)}
                     preventSwipe={["up", "down"]}
