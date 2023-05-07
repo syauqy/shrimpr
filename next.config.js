@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
   images: {
     deviceSizes: [420, 640, 750, 828, 1080],
     // domains: ["res.cloudinary.com"],

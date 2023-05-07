@@ -4,6 +4,7 @@ import { PageContent } from "@/components/layouts/page-content";
 import Container from "@/components/layouts/container";
 import dynamic from "next/dynamic";
 import { Dialog, Transition } from "@headlessui/react";
+import Countdown from "react-countdown";
 // import TinderCard from "react-tinder-card";
 import axios from "axios";
 import Image from "next/image";
@@ -17,6 +18,7 @@ export default function Card() {
   const [employees, setEmployees] = useState([]);
   const [correctScore, setCorrectScore] = useState(0);
   const [incorrectScore, setIncorrectScore] = useState(0);
+  const [timer, setTimer] = useState(Date.now());
   const [names, setNames] = useState([]);
   const [answers, setAnswers] = useState([]);
   const [employee, setEmployee] = useState([]);
@@ -24,22 +26,25 @@ export default function Card() {
   const [lastDirection, setLastDirection] = useState();
   const [isOpen, setIsOpen] = useState(false);
 
+  const timerRef = useRef();
+
   const currentIndexRef = useRef(currentIndex);
 
-  const swiped = async (direction, swipedUser) => {
+  const swiped = async (direction, swipedUser, index) => {
     if (direction === "right") {
       setIsOpen(true);
-      getQuestions(swipedUser);
-      //   setEmployee(swipedUser);
-      setEmployee(swipedUser);
 
-      // updateMatches(swipedUserId)
+      setEmployee(swipedUser);
+      if (employee) {
+        getQuestions(swipedUser);
+      }
     } else {
       const incorrect = incorrectScore;
       console.log("ga kenal");
       setIncorrectScore(incorrect + 1);
     }
     setLastDirection(direction);
+    // updateCurrentIndex(index - 1);
   };
 
   function closeModal() {
@@ -67,6 +72,8 @@ export default function Card() {
     return a;
   }
 
+  // const karyawan = useMemo(() => getEmployee(), []);
+
   async function getEmployee() {
     const employees = await axios
       .get(
@@ -81,6 +88,8 @@ export default function Card() {
         return res.data;
       })
       .catch((error) => console.log(error.data));
+    // shuffle(employees.records);
+    // return employees.records;
     setEmployees(shuffle(employees.records));
   }
 
@@ -99,76 +108,108 @@ export default function Card() {
         return res.data;
       })
       .catch((error) => console.log(error.data));
-    // setNames(shuffle(names.records).slice(0, 3));
     return shuffle(names.records).slice(0, 3);
   }
 
   async function getQuestions(employee) {
     // console.log(employee);
     const names = await getNames(employee);
-    names.push(employee);
-    setNames(shuffle(names));
-
-    // console.log(names);
+    if (names.length > 2) {
+      names.push(employee);
+      setNames(shuffle(names));
+    }
   }
 
   function getAnswer(answer) {
-    console.log("e", answer, employee);
+    // console.log("e", answer, employee);
     if (answer === employee.id) {
       console.log("kenal");
       const correct = correctScore;
       setCorrectScore(correct + 1);
+      setNames([]);
       closeModal();
     } else {
       const incorrect = incorrectScore;
       console.log("ga kenal");
       setIncorrectScore(incorrect + 1);
+      setNames([]);
       closeModal();
     }
   }
 
+  const handleTimerComplete = () => {
+    console.log("Countdown is completed in the Home component");
+    // Perform your action here when the countdown is completed
+  };
+
   useEffect(() => {
     getEmployee();
+    // getQuestions(employee);
     // getNames();
+    if (timerRef.current.isCompleted() == true) {
+      console.log("beres");
+    }
+    // console.log(timerRef.current.isCompleted());
   }, []);
 
-  // console.log(employee);
+  // console.log(karyawan);
 
   return (
     <PageLayout>
       <PageContent>
-        <Container className="px-4 space-y-5 justify-center text-center w-screen h-screen max-h-screen overflow-hidden">
-          <div className="header text-slate-600">
-            Shrimpr
-            <div className="flex flex-1 justify-between">
-              <div>Kenal: {correctScore}</div>
-              <div>Ga Kenal: {incorrectScore}</div>
+        <Container className="px-4 justify-center text-center w-screen h-screen max-h-screen overflow-hidden">
+          <div className="header text-slate-600 py-4 space-y-2">
+            <div className="text-xl font-bold">Shrimpr</div>
+            <div className="grid grid-cols-3">
+              <div>
+                <div className="font-semibold">Ga Kenal</div>
+                <div>{incorrectScore}</div>{" "}
+              </div>
+              <div>
+                <Countdown
+                  date={timer + 60000}
+                  renderer={(props) => (
+                    <CountdownRenderer
+                      {...props}
+                      onComplete={handleTimerComplete}
+                    />
+                  )}
+                  precision={2}
+                  ref={timerRef}
+                />
+              </div>
+              <div>
+                <div className="font-semibold">Kenal</div>
+                <div>{correctScore}</div>
+              </div>
             </div>
           </div>
           <div className="cards max-w-md  mx-auto relative w-full h-[73%] flex justify-center">
-            {employees
-              ? employees.map((e, i) => (
-                  <TinderCard
-                    key={e.id}
-                    className="swipe p-2 absolute inset-0"
-                    onSwipe={(dir) => swiped(dir, e)}
-                    // onCardLeftScreen={() => outOfFrame(e.fields.name, i)}
-                    preventSwipe={["up", "down"]}
-                    swipeRequirementType="position"
-                  >
-                    <Image
-                      className="object-cover rounded-xl card relative object-bottom"
-                      src={e.fields.image[0].url}
-                      alt={e.fields.name}
-                      fill={true}
-                      priority
-                    />
-                  </TinderCard>
-                ))
-              : ""}
+            {employees.length ? (
+              employees.map((e, i) => (
+                <TinderCard
+                  key={e.id}
+                  className="swipe p-2 absolute inset-0"
+                  onSwipe={(dir) => swiped(dir, e, i)}
+                  preventSwipe={["up", "down"]}
+                  swipeRequirementType="position"
+                >
+                  <Image
+                    className="object-cover rounded-xl card relative object-bottom"
+                    src={e.fields.image[0].url}
+                    alt={e.fields.name}
+                    fill={true}
+                    priority
+                  />
+                </TinderCard>
+              ))
+            ) : (
+              <div className="flex flex-col w-full space-y-4 animate-pulse">
+                <div className="bg-gray-400 h-full w-full rounded-md"></div>
+              </div>
+            )}
           </div>
-
-          <div className=" space-y-4"></div>
+          <div className="flex justify-between"></div>
         </Container>
         <Transition appear show={isOpen} as={Fragment}>
           <Dialog as="div" className="relative z-10" onClose={() => {}}>
@@ -185,7 +226,7 @@ export default function Card() {
             </Transition.Child>
 
             <div className="fixed inset-0 overflow-y-auto">
-              <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <div className="flex h-full items-center justify-center p-4 text-center">
                 <Transition.Child
                   as={Fragment}
                   enter="ease-out duration-300"
@@ -195,42 +236,50 @@ export default function Card() {
                   leaveFrom="opacity-100 scale-100"
                   leaveTo="opacity-0 scale-95"
                 >
-                  <Dialog.Panel className="w-full h-[80%] max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all space-y-4">
+                  <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all space-y-4">
                     <Dialog.Title
                       as="h3"
-                      className="text-lg text-center font-semibold leading-6 text-gray-900"
+                      className="text-lg text-center font-bold leading-6 text-gray-900"
                     >
                       Siapakah Aku?
                     </Dialog.Title>
-                    {employee?.fields?.image[0] ? (
-                      <div className="flex h-[180px] w-full overflow-hidden justify-center items-center rounded-xl">
+                    <div className="flex h-[180px] w-full overflow-hidden justify-center items-center rounded-xl">
+                      {employee?.fields?.image[0] ? (
                         <Image
                           className="rounded-xl object-bottom"
                           src={employee.fields.image[0].url}
                           alt={employee.fields.name}
-                          //   fill={true}
                           height={400}
                           width={180}
                         />
-                      </div>
-                    ) : (
-                      ""
-                    )}
+                      ) : (
+                        <div className="flex flex-col w-full h-full space-y-4 animate-pulse">
+                          <div className="bg-gray-400 h-full w-full rounded-md"></div>
+                        </div>
+                      )}
+                    </div>
 
                     <div className="w-full flex flex-col space-y-2">
-                      {names
-                        ? names.map((name, i) => (
-                            <button
-                              key={i}
-                              type="button"
-                              value={name.id}
-                              className="flex flex-1 justify-center rounded-full border border-transparent px-4 py-3 text-sm font-medium text-jala-insight border-jala-insight hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                              onClick={(e) => getAnswer(name.id)}
-                            >
-                              {name.fields.name}
-                            </button>
-                          ))
-                        : ""}
+                      {names.length ? (
+                        names.map((name, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            value={name.id}
+                            className="flex flex-1 justify-center rounded-full border px-4 py-3 text-sm font-medium text-jala-insight border-jala-insight hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                            onClick={() => getAnswer(name.id)}
+                          >
+                            {name.fields.name}
+                          </button>
+                        ))
+                      ) : (
+                        <div className="space-y-4 animate-pulse">
+                          <div className="bg-gray-400 h-8 rounded-md"></div>
+                          <div className="bg-gray-400 h-8 rounded-md"></div>
+                          <div className="bg-gray-400 h-8 rounded-md"></div>
+                          <div className="bg-gray-400 h-8 rounded-md"></div>
+                        </div>
+                      )}
                     </div>
                   </Dialog.Panel>
                 </Transition.Child>
@@ -242,3 +291,19 @@ export default function Card() {
     </PageLayout>
   );
 }
+
+const CountdownRenderer = ({ seconds, completed, onComplete }) => {
+  useEffect(() => {
+    if (completed) {
+      // Call the callback function when the countdown is completed
+      onComplete();
+    }
+  }, [completed, onComplete]);
+  if (completed) {
+    return <div className="text-xl text-jala-trade font-bold">Time is up!</div>;
+  } else {
+    return (
+      <div className="text-3xl text-jala-insight font-semibold">{seconds}</div>
+    );
+  }
+};
