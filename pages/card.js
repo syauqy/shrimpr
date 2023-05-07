@@ -15,6 +15,8 @@ const TinderCard = dynamic(() => import("react-tinder-card"), {
 
 export default function Card() {
   const [employees, setEmployees] = useState([]);
+  const [correctScore, setCorrectScore] = useState(0);
+  const [incorrectScore, setIncorrectScore] = useState(0);
   const [names, setNames] = useState([]);
   const [answers, setAnswers] = useState([]);
   const [employee, setEmployee] = useState([]);
@@ -26,11 +28,16 @@ export default function Card() {
 
   const swiped = async (direction, swipedUser) => {
     if (direction === "right") {
+      setIsOpen(true);
+      getQuestions(swipedUser);
       //   setEmployee(swipedUser);
       setEmployee(swipedUser);
-      askQuestions(swipedUser);
 
       // updateMatches(swipedUserId)
+    } else {
+      const incorrect = incorrectScore;
+      console.log("ga kenal");
+      setIncorrectScore(incorrect + 1);
     }
     setLastDirection(direction);
   };
@@ -78,7 +85,7 @@ export default function Card() {
   }
 
   async function getNames(employee) {
-    console.log("e", employee, employee.fields.gender);
+    // console.log("e", employee, employee.fields.gender);
     const names = await axios
       .get(
         `${process.env.NEXT_PUBLIC_AIRTABLE_URI}/employee?fields%5B%5D=name&filterByFormula=AND(%7Bgender%7D%3D%22${employee.fields.gender}%22%2C%7Bname%7D!%3D%22${employee.fields.name}%22)`,
@@ -96,14 +103,28 @@ export default function Card() {
     return shuffle(names.records).slice(0, 3);
   }
 
-  async function askQuestions(employee) {
+  async function getQuestions(employee) {
     // console.log(employee);
     const names = await getNames(employee);
     names.push(employee);
     setNames(shuffle(names));
-    setIsOpen(true);
 
     // console.log(names);
+  }
+
+  function getAnswer(answer) {
+    console.log("e", answer, employee);
+    if (answer === employee.id) {
+      console.log("kenal");
+      const correct = correctScore;
+      setCorrectScore(correct + 1);
+      closeModal();
+    } else {
+      const incorrect = incorrectScore;
+      console.log("ga kenal");
+      setIncorrectScore(incorrect + 1);
+      closeModal();
+    }
   }
 
   useEffect(() => {
@@ -111,21 +132,27 @@ export default function Card() {
     // getNames();
   }, []);
 
-  console.log(employee);
+  // console.log(employee);
 
   return (
     <PageLayout>
       <PageContent>
-        <Container className="px-4 space-y-5 justify-center text-center w-screen h-screen overflow-hidden">
-          <div className="header text-slate-600">Shrimpr</div>
-          <div className="cards max-w-md mx-auto relative w-full h-[73%] flex justify-center">
+        <Container className="px-4 space-y-5 justify-center text-center w-screen h-screen max-h-screen overflow-hidden">
+          <div className="header text-slate-600">
+            Shrimpr
+            <div className="flex flex-1 justify-between">
+              <div>Kenal: {correctScore}</div>
+              <div>Ga Kenal: {incorrectScore}</div>
+            </div>
+          </div>
+          <div className="cards max-w-md  mx-auto relative w-full h-[73%] flex justify-center">
             {employees
               ? employees.map((e, i) => (
                   <TinderCard
                     key={e.id}
                     className="swipe p-2 absolute inset-0"
                     onSwipe={(dir) => swiped(dir, e)}
-                    onCardLeftScreen={() => outOfFrame(e.fields.name, i)}
+                    // onCardLeftScreen={() => outOfFrame(e.fields.name, i)}
                     preventSwipe={["up", "down"]}
                     swipeRequirementType="position"
                   >
@@ -196,8 +223,9 @@ export default function Card() {
                             <button
                               key={i}
                               type="button"
+                              value={name.id}
                               className="flex flex-1 justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                              onClick={closeModal}
+                              onClick={(e) => getAnswer(name.id)}
                             >
                               {name.fields.name}
                             </button>
