@@ -8,6 +8,7 @@ import Countdown from "react-countdown";
 // import TinderCard from "react-tinder-card";
 import axios from "axios";
 import Image from "next/image";
+import clsx from "clsx";
 // import TinderCard from "react-tinder-card";
 
 const TinderCard = dynamic(() => import("react-tinder-card"), {
@@ -158,8 +159,10 @@ export default function Card() {
     <PageLayout>
       <PageContent>
         <Container className="px-4 justify-center text-center w-screen h-screen max-h-screen overflow-hidden">
-          <div className="header text-slate-600 py-4 space-y-2">
-            <div className="text-xl font-bold">Shrimpr</div>
+          <div className="header text-slate-600 py-2 space-y-2">
+            <div className="text-4xl font-extrabold text-transparent bg-gradient-to-r bg-clip-text from-blue-500 to-sky-500 tracking-tight">
+              Shrimpr
+            </div>
             <div className="grid grid-cols-3">
               <div>
                 <div className="font-semibold">Ga Kenal</div>
@@ -303,7 +306,14 @@ const CountdownRenderer = ({ seconds, completed, onComplete }) => {
     return <div className="text-xl text-jala-trade font-bold">Time is up!</div>;
   } else {
     return (
-      <div className="text-3xl text-jala-insight font-semibold">{seconds}</div>
+      <div
+        className={clsx(
+          seconds <= 10 ? "text-red-500" : "text-blue-500",
+          "text-3xl font-bold"
+        )}
+      >
+        {seconds}
+      </div>
     );
   }
 };
