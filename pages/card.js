@@ -195,15 +195,15 @@ export default function Card() {
                   leaveFrom="opacity-100 scale-100"
                   leaveTo="opacity-0 scale-95"
                 >
-                  <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all space-y-4">
+                  <Dialog.Panel className="w-full h-[80%] max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all space-y-4">
                     <Dialog.Title
                       as="h3"
-                      className="text-lg font-medium leading-6 text-gray-900"
+                      className="text-lg text-center font-semibold leading-6 text-gray-900"
                     >
                       Siapakah Aku?
                     </Dialog.Title>
                     {employee?.fields?.image[0] ? (
-                      <div className="flex h-[200px] overflow-hidden justify-center items-center rounded-xl">
+                      <div className="flex h-[180px] w-full overflow-hidden justify-center items-center rounded-xl">
                         <Image
                           className="rounded-xl object-bottom"
                           src={employee.fields.image[0].url}
@@ -224,7 +224,7 @@ export default function Card() {
                               key={i}
                               type="button"
                               value={name.id}
-                              className="flex flex-1 justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                              className="flex flex-1 justify-center rounded-full border border-transparent px-4 py-3 text-sm font-medium text-jala-insight border-jala-insight hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                               onClick={(e) => getAnswer(name.id)}
                             >
                               {name.fields.name}
