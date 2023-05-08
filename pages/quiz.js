@@ -15,26 +15,28 @@ const TinderCard = dynamic(() => import("react-tinder-card"), {
   ssr: false,
 });
 
-export default function Card() {
+export default function Quiz() {
   const [employees, setEmployees] = useState([]);
   const [correctScore, setCorrectScore] = useState(0);
   const [incorrectScore, setIncorrectScore] = useState(0);
-  const [timer, setTimer] = useState(Date.now());
+  const [timer, setTimer] = useState(Date.now() + 60000);
   const [names, setNames] = useState([]);
   const [unknowns, setUnknowns] = useState([]);
   const [answers, setAnswers] = useState([]);
   const [employee, setEmployee] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [quizStarted, setQuizStarted] = useState(false);
+  // const [currentIndex, setCurrentIndex] = useState(0);
   const [lastDirection, setLastDirection] = useState();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpenQuestion, setIsOpenQuestion] = useState(false);
+  const [isOpenResult, setIsOpenResult] = useState(false);
 
-  const timerRef = useRef();
+  // const timerRef = useRef();
 
-  const currentIndexRef = useRef(currentIndex);
+  // const currentIndexRef = useRef(currentIndex);
 
   const swiped = async (direction, swipedUser, index) => {
     if (direction === "right") {
-      setIsOpen(true);
+      setIsOpenQuestion(true);
 
       setEmployee(swipedUser);
       if (employee) {
@@ -52,24 +54,6 @@ export default function Card() {
       setIncorrectScore(incorrect + 1);
     }
     setLastDirection(direction);
-    // updateCurrentIndex(index - 1);
-  };
-
-  function closeModal() {
-    setIsOpen(false);
-  }
-
-  function openModal() {
-    setIsOpen(true);
-  }
-
-  const outOfFrame = (name, idx) => {
-    console.log(`${name} (${idx}) left the screen!`, currentIndexRef.current);
-    // handle the case in which go back is pressed before card goes outOfFrame
-    // currentIndexRef.current >= idx && childRefs[idx].current.restoreCard();
-    // TODO: when quickly swipe and restore multiple times the same card,
-    // it happens multiple outOfFrame events are queued and the card disappear
-    // during latest swipes. Only the last outOfFrame event should be considered valid
   };
 
   function shuffle(a) {
@@ -80,9 +64,19 @@ export default function Card() {
     return a;
   }
 
+  const restartQuiz = () => {
+    setEmployees([]);
+    getEmployees();
+    setIsOpenResult(false);
+    if (employees.length > 0) {
+      setTimer(Date.now() + 60000);
+    }
+    // setQuizStarted(true);
+  };
+
   // const karyawan = useMemo(() => getEmployee(), []);
 
-  async function getEmployee() {
+  async function getEmployees() {
     const employees = await axios
       .get(
         `${process.env.NEXT_PUBLIC_AIRTABLE_URI}/employee?filterByFormula=NOT%28%7Bimage%7D%20%3D%20%27%27%29`,
@@ -96,13 +90,10 @@ export default function Card() {
         return res.data;
       })
       .catch((error) => console.log(error.data));
-    // shuffle(employees.records);
-    // return employees.records;
     setEmployees(shuffle(employees.records));
   }
 
   async function getNames(employee) {
-    // console.log("e", employee, employee.fields.gender);
     const names = await axios
       .get(
         `${process.env.NEXT_PUBLIC_AIRTABLE_URI}/employee?fields%5B%5D=name&filterByFormula=AND(%7Bgender%7D%3D%22${employee.fields.gender}%22%2C%7Bname%7D!%3D%22${employee.fields.name}%22)`,
@@ -136,7 +127,7 @@ export default function Card() {
       const correct = correctScore;
       setCorrectScore(correct + 1);
       setNames([]);
-      closeModal();
+      setIsOpenQuestion(false);
     } else {
       const incorrect = incorrectScore;
       const e = employee;
@@ -148,23 +139,20 @@ export default function Card() {
       console.log("ga kenal");
       setIncorrectScore(incorrect + 1);
       setNames([]);
-      closeModal();
+      setIsOpenQuestion(false);
     }
   }
 
   const handleTimerComplete = () => {
     console.log("Countdown is completed in the Home component");
+    setIsOpenResult(true);
     // Perform your action here when the countdown is completed
   };
 
   useEffect(() => {
-    getEmployee();
+    getEmployees();
     // getQuestions(employee);
     // getNames();
-    if (timerRef.current.isCompleted() == true) {
-      console.log("beres");
-    }
-    // console.log(timerRef.current.isCompleted());
   }, []);
 
   console.log(unknowns);
@@ -184,7 +172,7 @@ export default function Card() {
               </div>
               <div>
                 <Countdown
-                  date={timer + 60000}
+                  date={timer}
                   renderer={(props) => (
                     <CountdownRenderer
                       {...props}
@@ -192,7 +180,6 @@ export default function Card() {
                     />
                   )}
                   precision={2}
-                  ref={timerRef}
                 />
               </div>
               <div>
@@ -228,7 +215,7 @@ export default function Card() {
           </div>
           <div className="flex justify-between"></div>
         </Container>
-        <Transition appear show={isOpen} as={Fragment}>
+        <Transition appear show={isOpenQuestion} as={Fragment}>
           <Dialog as="div" className="relative z-10" onClose={() => {}}>
             <Transition.Child
               as={Fragment}
@@ -298,6 +285,103 @@ export default function Card() {
                         </div>
                       )}
                     </div>
+                  </Dialog.Panel>
+                </Transition.Child>
+              </div>
+            </div>
+          </Dialog>
+        </Transition>
+
+        <Transition appear show={isOpenResult} as={Fragment}>
+          <Dialog as="div" className="relative z-10" onClose={() => {}}>
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0"
+              enterTo="opacity-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+            >
+              <div className="fixed inset-0 bg-white bg-opacity-90" />
+            </Transition.Child>
+            <div className="fixed inset-0 overflow-y-auto">
+              <div className="flex h-full items-center justify-center p-4 text-center">
+                <Transition.Child
+                  as={Fragment}
+                  enter="ease-out duration-300"
+                  enterFrom="opacity-0 scale-95"
+                  enterTo="opacity-100 scale-100"
+                  leave="ease-in duration-200"
+                  leaveFrom="opacity-100 scale-100"
+                  leaveTo="opacity-0 scale-95"
+                >
+                  <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl text-slate-600 bg-white p-6 text-left align-middle shadow-xl transition-all space-y-4">
+                    <Dialog.Title
+                      as="h3"
+                      className="text-lg text-center font-bold leading-6 text-gray-900"
+                    >
+                      Waktu Habis
+                    </Dialog.Title>
+                    <div className="grid grid-cols-2 text-center">
+                      <div>
+                        <div className="font-semibold">Ga Kenal</div>
+                        <div>{incorrectScore}</div>{" "}
+                      </div>
+                      <div>
+                        <div className="font-semibold">Kenal</div>
+                        <div>{correctScore}</div>
+                      </div>
+                    </div>
+                    <div className="w-full flex flex-col space-y-2">
+                      <button
+                        // key={i}
+                        type="button"
+                        // value={name.id}
+                        className="flex flex-1 justify-center rounded-full border px-4 py-3 text-sm font-medium text-jala-insight border-jala-insight hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                        onClick={restartQuiz}
+                      >
+                        Mulai Lagi
+                      </button>
+                    </div>
+                    {/* <div className="flex h-[180px] w-full overflow-hidden justify-center items-center rounded-xl">
+                      {employee?.fields?.image[0] ? (
+                        <Image
+                          className="rounded-xl object-bottom"
+                          src={employee.fields.image[0].url}
+                          alt={employee.fields.name}
+                          height={400}
+                          width={180}
+                        />
+                      ) : (
+                        <div className="flex flex-col w-full h-full space-y-4 animate-pulse">
+                          <div className="bg-gray-400 h-full w-full rounded-md"></div>
+                        </div>
+                      )}
+                    </div> */}
+
+                    {/* <div className="w-full flex flex-col space-y-2">
+                      {names.length ? (
+                        names.map((name, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            value={name.id}
+                            className="flex flex-1 justify-center rounded-full border px-4 py-3 text-sm font-medium text-jala-insight border-jala-insight hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                            onClick={() => getAnswer(name.id)}
+                          >
+                            {name.fields.name}
+                          </button>
+                        ))
+                      ) : (
+                        <div className="space-y-4 animate-pulse">
+                          <div className="bg-gray-400 h-8 rounded-md"></div>
+                          <div className="bg-gray-400 h-8 rounded-md"></div>
+                          <div className="bg-gray-400 h-8 rounded-md"></div>
+                          <div className="bg-gray-400 h-8 rounded-md"></div>
+                        </div>
+                      )}
+                    </div> */}
                   </Dialog.Panel>
                 </Transition.Child>
               </div>
