@@ -9,6 +9,7 @@ import Countdown from "react-countdown";
 import axios from "axios";
 import Image from "next/image";
 import clsx from "clsx";
+import toast, { Toaster } from "react-hot-toast";
 // import TinderCard from "react-tinder-card";
 
 const TinderCard = dynamic(() => import("react-tinder-card"), {
@@ -30,11 +31,11 @@ export default function Quiz() {
   const [isOpenQuestion, setIsOpenQuestion] = useState(false);
   const [isOpenResult, setIsOpenResult] = useState(false);
 
-  // const timerRef = useRef();
+  const timerRef = useRef();
 
   // const currentIndexRef = useRef(currentIndex);
 
-  const swiped = async (direction, swipedUser, index) => {
+  function swiped(direction, swipedUser, index) {
     if (direction === "right") {
       setIsOpenQuestion(true);
 
@@ -52,9 +53,10 @@ export default function Quiz() {
       }
       console.log("ga kenal");
       setIncorrectScore(incorrect + 1);
+      toast.error("Coba kenalan dulu deh 😉");
     }
     setLastDirection(direction);
-  };
+  }
 
   function shuffle(a) {
     for (let i = a.length - 1; i > 0; i--) {
@@ -67,9 +69,14 @@ export default function Quiz() {
   const restartQuiz = () => {
     setEmployees([]);
     getEmployees();
+    setCorrectScore(0);
+    setIncorrectScore(0);
+    setUnknowns(0);
+    // console.log(timerRef);
     setIsOpenResult(false);
     if (employees.length > 0) {
       setTimer(Date.now() + 60000);
+      timerRef.current.start();
     }
     // setQuizStarted(true);
   };
@@ -126,6 +133,7 @@ export default function Quiz() {
       console.log("kenal");
       const correct = correctScore;
       setCorrectScore(correct + 1);
+      toast.success("Kamu benar 👍");
       setNames([]);
       setIsOpenQuestion(false);
     } else {
@@ -138,6 +146,7 @@ export default function Quiz() {
       }
       console.log("ga kenal");
       setIncorrectScore(incorrect + 1);
+      toast.error("Coba kenalan dulu deh 😉");
       setNames([]);
       setIsOpenQuestion(false);
     }
@@ -150,7 +159,10 @@ export default function Quiz() {
   };
 
   useEffect(() => {
-    getEmployees();
+    if (employee.length > 0) {
+    } else {
+      getEmployees();
+    }
     // getQuestions(employee);
     // getNames();
   }, []);
@@ -179,6 +191,7 @@ export default function Quiz() {
                       onComplete={handleTimerComplete}
                     />
                   )}
+                  ref={timerRef}
                   precision={2}
                 />
               </div>
@@ -215,6 +228,8 @@ export default function Quiz() {
           </div>
           <div className="flex justify-between"></div>
         </Container>
+
+        <Toaster position="bottom-center" />
         <Transition appear show={isOpenQuestion} as={Fragment}>
           <Dialog as="div" className="relative z-10" onClose={() => {}}>
             <Transition.Child
@@ -335,53 +350,13 @@ export default function Quiz() {
                     </div>
                     <div className="w-full flex flex-col space-y-2">
                       <button
-                        // key={i}
                         type="button"
-                        // value={name.id}
                         className="flex flex-1 justify-center rounded-full border px-4 py-3 text-sm font-medium text-jala-insight border-jala-insight hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                         onClick={restartQuiz}
                       >
                         Mulai Lagi
                       </button>
                     </div>
-                    {/* <div className="flex h-[180px] w-full overflow-hidden justify-center items-center rounded-xl">
-                      {employee?.fields?.image[0] ? (
-                        <Image
-                          className="rounded-xl object-bottom"
-                          src={employee.fields.image[0].url}
-                          alt={employee.fields.name}
-                          height={400}
-                          width={180}
-                        />
-                      ) : (
-                        <div className="flex flex-col w-full h-full space-y-4 animate-pulse">
-                          <div className="bg-gray-400 h-full w-full rounded-md"></div>
-                        </div>
-                      )}
-                    </div> */}
-
-                    {/* <div className="w-full flex flex-col space-y-2">
-                      {names.length ? (
-                        names.map((name, i) => (
-                          <button
-                            key={i}
-                            type="button"
-                            value={name.id}
-                            className="flex flex-1 justify-center rounded-full border px-4 py-3 text-sm font-medium text-jala-insight border-jala-insight hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                            onClick={() => getAnswer(name.id)}
-                          >
-                            {name.fields.name}
-                          </button>
-                        ))
-                      ) : (
-                        <div className="space-y-4 animate-pulse">
-                          <div className="bg-gray-400 h-8 rounded-md"></div>
-                          <div className="bg-gray-400 h-8 rounded-md"></div>
-                          <div className="bg-gray-400 h-8 rounded-md"></div>
-                          <div className="bg-gray-400 h-8 rounded-md"></div>
-                        </div>
-                      )}
-                    </div> */}
                   </Dialog.Panel>
                 </Transition.Child>
               </div>
