@@ -21,6 +21,7 @@ export default function Card() {
   const [incorrectScore, setIncorrectScore] = useState(0);
   const [timer, setTimer] = useState(Date.now());
   const [names, setNames] = useState([]);
+  const [unknowns, setUnknowns] = useState([]);
   const [answers, setAnswers] = useState([]);
   const [employee, setEmployee] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -41,6 +42,12 @@ export default function Card() {
       }
     } else {
       const incorrect = incorrectScore;
+      const e = swipedUser;
+      if (unknowns.length > 0) {
+        setUnknowns([...unknowns, e]);
+      } else {
+        setUnknowns([e]);
+      }
       console.log("ga kenal");
       setIncorrectScore(incorrect + 1);
     }
@@ -122,6 +129,7 @@ export default function Card() {
   }
 
   function getAnswer(answer) {
+    // console.log(employee);
     // console.log("e", answer, employee);
     if (answer === employee.id) {
       console.log("kenal");
@@ -131,6 +139,12 @@ export default function Card() {
       closeModal();
     } else {
       const incorrect = incorrectScore;
+      const e = employee;
+      if (unknowns.length > 0) {
+        setUnknowns([...unknowns, e]);
+      } else {
+        setUnknowns([e]);
+      }
       console.log("ga kenal");
       setIncorrectScore(incorrect + 1);
       setNames([]);
@@ -153,7 +167,7 @@ export default function Card() {
     // console.log(timerRef.current.isCompleted());
   }, []);
 
-  // console.log(karyawan);
+  console.log(unknowns);
 
   return (
     <PageLayout>
