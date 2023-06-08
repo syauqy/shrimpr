@@ -37,7 +37,8 @@ export default function Quiz() {
   // const currentIndexRef = useRef(currentIndex);
 
   function swiped(direction, swipedUser, index) {
-    if (lastIndex.current === index) return;
+    // console.log(lastIndex.current === index);
+
     if (direction === "right") {
       setIsOpenQuestion(true);
 
@@ -54,10 +55,13 @@ export default function Quiz() {
         setUnknowns([e]);
       }
       // console.log("ga kenal");
+      // console.log("incorrect", incorrectScore, incorrect, unknowns, e);
+      console.log(unknowns);
       setIncorrectScore(incorrect + 1);
+      if (lastIndex.current === index) return;
       toast.error("Coba kenalan dulu deh 😉");
     }
-    setLastDirection(direction);
+    // setLastDirection(direction);
     lastIndex.current = index;
   }
 
@@ -148,6 +152,7 @@ export default function Quiz() {
         setUnknowns([e]);
       }
       // console.log("ga kenal");
+
       setIncorrectScore(incorrect + 1);
       toast.error("Coba kenalan dulu deh 😉");
       setNames([]);
@@ -167,10 +172,10 @@ export default function Quiz() {
     getEmployees();
     // getQuestions(employee);
     // getNames();
-    setQuizStarted(true);
-  }, []);
+    // setQuizStarted(true);
+  }, [quizStarted]);
 
-  console.log(unknowns);
+  // console.log(unknowns);
 
   return (
     <PageLayout>
@@ -365,7 +370,7 @@ export default function Quiz() {
             </div>
           </Dialog>
         </Transition>
-        <Toaster position="bottom-center" />
+        <Toaster position="bottom-center" toastOptions={{ duration: 2000 }} />
       </PageContent>
     </PageLayout>
   );
