@@ -51,7 +51,7 @@ export default function Quiz() {
       } else {
         setUnknowns([e]);
       }
-      console.log("ga kenal");
+      // console.log("ga kenal");
       setIncorrectScore(incorrect + 1);
       toast.error("Coba kenalan dulu deh 😉");
     }
@@ -144,7 +144,7 @@ export default function Quiz() {
       } else {
         setUnknowns([e]);
       }
-      console.log("ga kenal");
+      // console.log("ga kenal");
       setIncorrectScore(incorrect + 1);
       toast.error("Coba kenalan dulu deh 😉");
       setNames([]);
@@ -229,7 +229,6 @@ export default function Quiz() {
           <div className="flex justify-between"></div>
         </Container>
 
-        <Toaster position="bottom-center" />
         <Transition appear show={isOpenQuestion} as={Fragment}>
           <Dialog as="div" className="relative z-10" onClose={() => {}}>
             <Transition.Child
@@ -352,7 +351,7 @@ export default function Quiz() {
                       <button
                         type="button"
                         className="flex flex-1 justify-center rounded-full border px-4 py-3 text-sm font-medium text-jala-insight border-jala-insight hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                        onClick={restartQuiz}
+                        onClick={() => restartQuiz()}
                       >
                         Mulai Lagi
                       </button>
@@ -363,6 +362,7 @@ export default function Quiz() {
             </div>
           </Dialog>
         </Transition>
+        <Toaster position="bottom-center" />
       </PageContent>
     </PageLayout>
   );
