@@ -32,10 +32,12 @@ export default function Quiz() {
   const [isOpenResult, setIsOpenResult] = useState(false);
 
   const timerRef = useRef();
+  const lastIndex = useRef();
 
   // const currentIndexRef = useRef(currentIndex);
 
   function swiped(direction, swipedUser, index) {
+    if (lastIndex.current === index) return;
     if (direction === "right") {
       setIsOpenQuestion(true);
 
@@ -56,6 +58,7 @@ export default function Quiz() {
       toast.error("Coba kenalan dulu deh 😉");
     }
     setLastDirection(direction);
+    lastIndex.current = index;
   }
 
   function shuffle(a) {
@@ -156,15 +159,15 @@ export default function Quiz() {
     console.log("Countdown is completed in the Home component");
     setIsOpenResult(true);
     // Perform your action here when the countdown is completed
+    timerRef.current.stop();
   };
 
   useEffect(() => {
-    if (employee.length > 0) {
-    } else {
-      getEmployees();
-    }
+    if (quizStarted) return;
+    getEmployees();
     // getQuestions(employee);
     // getNames();
+    setQuizStarted(true);
   }, []);
 
   console.log(unknowns);
@@ -206,7 +209,7 @@ export default function Quiz() {
               employees.map((e, i) => (
                 <TinderCard
                   key={e.id}
-                  className="swipe p-2 absolute inset-0"
+                  className="swipe p-2 absolute inset-0 bg-gray-100"
                   onSwipe={(dir) => swiped(dir, e, i)}
                   preventSwipe={["up", "down"]}
                   swipeRequirementType="position"
