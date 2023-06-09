@@ -37,8 +37,7 @@ export default function Quiz() {
   // const currentIndexRef = useRef(currentIndex);
 
   function swiped(direction, swipedUser, index) {
-    // console.log(lastIndex.current === index);
-
+    if (lastIndex.current === index) return;
     if (direction === "right") {
       setIsOpenQuestion(true);
 
@@ -47,7 +46,6 @@ export default function Quiz() {
         getQuestions(swipedUser);
       }
     } else {
-      const incorrect = incorrectScore;
       const e = swipedUser;
       if (unknowns.length > 0) {
         setUnknowns([...unknowns, e]);
@@ -57,8 +55,7 @@ export default function Quiz() {
       // console.log("ga kenal");
       // console.log("incorrect", incorrectScore, incorrect, unknowns, e);
       console.log(unknowns);
-      setIncorrectScore(incorrect + 1);
-      if (lastIndex.current === index) return;
+      setIncorrectScore((incorrect) => incorrect + 1);
       toast.error("Coba kenalan dulu deh 😉");
     }
     // setLastDirection(direction);
@@ -138,13 +135,11 @@ export default function Quiz() {
     // console.log("e", answer, employee);
     if (answer === employee.id) {
       console.log("kenal");
-      const correct = correctScore;
-      setCorrectScore(correct + 1);
+      setCorrectScore((correct) => correct + 1);
       toast.success("Kamu benar 👍");
       setNames([]);
       setIsOpenQuestion(false);
     } else {
-      const incorrect = incorrectScore;
       const e = employee;
       if (unknowns.length > 0) {
         setUnknowns([...unknowns, e]);
@@ -153,7 +148,7 @@ export default function Quiz() {
       }
       // console.log("ga kenal");
 
-      setIncorrectScore(incorrect + 1);
+      setIncorrectScore((incorrect) => incorrect + 1);
       toast.error("Coba kenalan dulu deh 😉");
       setNames([]);
       setIsOpenQuestion(false);
